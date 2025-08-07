@@ -26,23 +26,7 @@ from .triton.attn_qk_int8_per_block_causal_varlen import forward as attn_true_va
 
 from .triton.quant_per_thread import per_thread_int8 as per_thread_int8_triton
 
-try:
-    from . import _qattn_sm80
-    SM80_ENABLED = True
-except:
-    SM80_ENABLED = False
-
-try:
-    from . import _qattn_sm89
-    SM89_ENABLED = True
-except:
-    SM89_ENABLED = False
-
-try:
-    from . import _qattn_sm90
-    SM90_ENABLED = True
-except:
-    SM90_ENABLED = False
+from .ops import SM80_ENABLED, SM89_ENABLED, SM90_ENABLED, _qattn_sm80, _qattn_sm89, _qattn_sm90
 
 from .quant import per_block_int8 as per_block_int8_cuda
 from .quant import per_warp_int8 as per_warp_int8_cuda
@@ -154,7 +138,6 @@ def sageattn(
     else:
         raise ValueError(f"Unsupported CUDA architecture: {arch}")
 
-@torch.compiler.disable
 def sageattn_qk_int8_pv_fp16_triton(
     q: torch.Tensor, 
     k: torch.Tensor, 
@@ -319,7 +302,6 @@ def sageattn_qk_int8_pv_fp16_triton(
     else:
         return o
 
-@torch.compiler.disable
 def sageattn_varlen(
     q: torch.Tensor, 
     k: torch.Tensor, 
@@ -436,7 +418,6 @@ def sageattn_varlen(
 
     return o
 
-@torch.compiler.disable
 def sageattn_qk_int8_pv_fp16_cuda(
     q: torch.Tensor, 
     k: torch.Tensor, 
@@ -591,17 +572,17 @@ def sageattn_qk_int8_pv_fp16_cuda(
 
     if pv_accum_dtype == 'fp32':
         v = v.to(torch.float16)
-        lse = torch.ops.sageattention_qattn_sm80.qk_int8_sv_f16_accum_f32_attn(q_int8, k_int8, v, o, q_scale, k_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+        lse = _qattn_sm80.qk_int8_sv_f16_accum_f32_attn(q_int8, k_int8, v, o, q_scale, k_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
     elif pv_accum_dtype == "fp16":
         if smooth_v:
             smoothed_v, vm = sub_mean(v, tensor_layout=tensor_layout)
-            lse = torch.ops.sageattention_qattn_sm80.qk_int8_sv_f16_accum_f16_fuse_v_mean_attn(q_int8, k_int8, smoothed_v, o, q_scale, k_scale, vm, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+            lse = _qattn_sm80.qk_int8_sv_f16_accum_f16_fuse_v_mean_attn(q_int8, k_int8, smoothed_v, o, q_scale, k_scale, vm, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
         else:
             v = v.to(torch.float16)
-            lse = torch.ops.sageattention_qattn_sm80.qk_int8_sv_f16_accum_f16_attn(q_int8, k_int8, v, o, q_scale, k_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+            lse = _qattn_sm80.qk_int8_sv_f16_accum_f16_attn(q_int8, k_int8, v, o, q_scale, k_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
     elif pv_accum_dtype == "fp16+fp32":
         v = v.to(torch.float16)
-        lse = torch.ops.sageattention_qattn_sm80.qk_int8_sv_f16_accum_f16_attn_inst_buf(q_int8, k_int8, v, o, q_scale, k_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+        lse = _qattn_sm80.qk_int8_sv_f16_accum_f16_attn_inst_buf(q_int8, k_int8, v, o, q_scale, k_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
     else:
         raise ValueError(f"Unsupported pv_accum_dtype: {pv_accum_dtype}")
 
@@ -612,7 +593,6 @@ def sageattn_qk_int8_pv_fp16_cuda(
     else:
         return o
 
-@torch.compiler.disable
 def sageattn_qk_int8_pv_fp8_cuda(
     q: torch.Tensor, 
     k: torch.Tensor, 
@@ -781,13 +761,13 @@ def sageattn_qk_int8_pv_fp8_cuda(
 
     if pv_accum_dtype == "fp32":
         if smooth_v:
-            lse = torch.ops.sageattention_qattn_sm89.qk_int8_sv_f8_accum_f32_fuse_v_scale_fuse_v_mean_attn(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, vm, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+            lse = _qattn_sm89.qk_int8_sv_f8_accum_f32_fuse_v_scale_fuse_v_mean_attn(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, vm, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
         else:
-            lse = torch.ops.sageattention_qattn_sm89.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+            lse = _qattn_sm89.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
     elif pv_accum_dtype == "fp32+fp32":
-        lse = torch.ops.sageattention_qattn_sm89.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn_inst_buf(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+        lse = _qattn_sm89.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn_inst_buf(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
     elif pv_accum_dtype == "fp32+fp16":
-        lse = torch.ops.sageattention_qattn_sm89.qk_int8_sv_f8_accum_f16_fuse_v_scale_attn_inst_buf(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+        lse = _qattn_sm89.qk_int8_sv_f8_accum_f16_fuse_v_scale_attn_inst_buf(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
 
     o = o[..., :head_dim_og]
 
@@ -796,7 +776,6 @@ def sageattn_qk_int8_pv_fp8_cuda(
     else:
         return o
 
-@torch.compiler.disable
 def sageattn_qk_int8_pv_fp8_cuda_sm90(
     q: torch.Tensor, 
     k: torch.Tensor, 
@@ -946,9 +925,9 @@ def sageattn_qk_int8_pv_fp8_cuda_sm90(
 
     if pv_accum_dtype == "fp32":
         raise NotImplementedError("Please use pv_accum_dtype='fp32+fp32' for sm90.")
-        lse = torch.ops.sageattention_qattn_sm90.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+        lse = _qattn_sm90.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
     elif pv_accum_dtype == "fp32+fp32":
-        lse = torch.ops.sageattention_qattn_sm90.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn_inst_buf(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
+        lse = _qattn_sm90.qk_int8_sv_f8_accum_f32_fuse_v_scale_attn_inst_buf(q_int8, k_int8, v_fp8, o, q_scale, k_scale, v_scale, _tensor_layout, _is_caual, _qk_quant_gran, sm_scale, _return_lse)
 
     o = o[..., :head_dim_og]
 
