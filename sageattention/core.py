@@ -236,7 +236,7 @@ def sageattn_qk_int8_pv_fp16_triton(
     # inference step in distributed env for multi gpus inference. This small
     # workaround also make sage attention work compatible with torch.compile
     # through non-fullgraph compile mode.
-    torch.cuda.set_device(v.device)
+    # torch.cuda.set_device(v.device)
 
     head_dim_og = q.size(-1)
 
@@ -379,7 +379,7 @@ def sageattn_varlen(
     # inference step in distributed env for multi gpus inference. This small
     # workaround also make sage attention work compatible with torch.compile
     # through non-fullgraph compile mode.
-    torch.cuda.set_device(v.device)
+    # torch.cuda.set_device(v.device)
 
     head_dim_og = q.size(-1)
 
@@ -521,7 +521,7 @@ def sageattn_qk_int8_pv_fp16_cuda(
     # inference step in distributed env for multi gpus inference. This small
     # workaround also make sage attention work compatible with torch.compile
     # through non-fullgraph compile mode.
-    torch.cuda.set_device(v.device)
+    # torch.cuda.set_device(v.device)
 
     _tensor_layout = 0 if tensor_layout == "NHD" else 1
     _is_caual = 1 if is_causal else 0
@@ -700,7 +700,7 @@ def sageattn_qk_int8_pv_fp8_cuda(
     # inference step in distributed env for multi gpus inference. This small
     # workaround also make sage attention work compatible with torch.compile
     # through non-fullgraph compile mode.
-    torch.cuda.set_device(v.device)
+    # torch.cuda.set_device(v.device)
 
     _tensor_layout = 0 if tensor_layout == "NHD" else 1
     _is_caual = 1 if is_causal else 0
@@ -866,7 +866,7 @@ def sageattn_qk_int8_pv_fp8_cuda_sm90(
     assert q.device == k.device == v.device, "All tensors must be on the same device."
     assert q.dtype == k.dtype == v.dtype, "All tensors must have the same dtype."
 
-    torch.cuda.set_device(v.device)
+    # torch.cuda.set_device(v.device)
 
     _tensor_layout = 0 if tensor_layout == "NHD" else 1
     _is_caual = 1 if is_causal else 0
