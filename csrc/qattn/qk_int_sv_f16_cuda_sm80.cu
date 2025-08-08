@@ -773,10 +773,14 @@ torch::Tensor qk_int8_sv_f16_accum_f32_attn(torch::Tensor query,
 
   const int num_kv_groups = num_qo_heads / num_kv_heads;
 
-  torch::Tensor lse = torch::empty({0});
+  torch::Tensor lse;
   if (return_lse)
   {
     lse = torch::empty({batch_size, num_qo_heads, qo_len}, query.options().dtype(torch::kFloat32));
+  }
+  else
+  {
+    lse = torch::empty({0}, query.options().dtype(torch::kFloat32));
   }
 
   auto output_dtype = output.scalar_type();
@@ -945,10 +949,14 @@ torch::Tensor qk_int8_sv_f16_accum_f16_attn(torch::Tensor query,
     throw std::invalid_argument(err_msg.str());  
   }
 
-  torch::Tensor lse = torch::empty({0});
+  torch::Tensor lse;
   if (return_lse)
   {
     lse = torch::empty({batch_size, num_qo_heads, qo_len}, query.options().dtype(torch::kFloat32));
+  }
+  else
+  {
+    lse = torch::empty({0}, query.options().dtype(torch::kFloat32));
   }
 
   const int num_kv_groups = num_qo_heads / num_kv_heads;
@@ -1120,10 +1128,14 @@ torch::Tensor qk_int8_sv_f16_accum_f16_attn_inst_buf(torch::Tensor query,
     throw std::invalid_argument(err_msg.str());  
   }
 
-  torch::Tensor lse = torch::empty({0});
+  torch::Tensor lse;
   if (return_lse)
   {
     lse = torch::empty({batch_size, num_qo_heads, qo_len}, query.options().dtype(torch::kFloat32));
+  }
+  else
+  {
+    lse = torch::empty({0}, query.options().dtype(torch::kFloat32));
   }
 
   const int num_kv_groups = num_qo_heads / num_kv_heads;
@@ -1299,10 +1311,14 @@ torch::Tensor qk_int8_sv_f16_accum_f16_fuse_v_mean_attn(torch::Tensor query,
     throw std::invalid_argument(err_msg.str());  
   }
 
-  torch::Tensor lse = torch::empty({0});
+  torch::Tensor lse;
   if (return_lse)
   {
     lse = torch::empty({batch_size, num_qo_heads, qo_len}, query.options().dtype(torch::kFloat32));
+  }
+  else
+  {
+    lse = torch::empty({0}, query.options().dtype(torch::kFloat32));
   }
 
   const int num_kv_groups = num_qo_heads / num_kv_heads;

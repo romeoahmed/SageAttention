@@ -155,7 +155,7 @@ def forward(q, k, v, q_scale, k_scale, tensor_layout="HND", output_dtype=torch.f
     if return_lse:
         lse = torch.empty([b, h_qo, qo_len], dtype=torch.float32, device=q.device)
     else:
-        lse = torch.empty([0], dtype=torch.float32, device='cpu')
+        lse = torch.empty([0], dtype=torch.float32, device=q.device)
 
     grid = (triton.cdiv(qo_len, BLOCK_M), h_qo, b   )
     _attn_fwd[grid](

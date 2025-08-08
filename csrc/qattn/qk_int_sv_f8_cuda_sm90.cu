@@ -668,10 +668,14 @@ torch::Tensor qk_int8_sv_f8_accum_f32_attn_inst_buf(
     throw std::invalid_argument(err_msg.str());  
   }
 
-  torch::Tensor lse = torch::empty({0});
+  torch::Tensor lse;
   if (return_lse)
   {
     lse = torch::empty({batch_size, num_qo_heads, qo_len}, query.options().dtype(torch::kFloat32));
+  }
+  else
+  {
+    lse = torch::empty({0}, query.options().dtype(torch::kFloat32));
   }
 
   const int num_kv_groups = num_qo_heads / num_kv_heads;
@@ -844,10 +848,14 @@ torch::Tensor qk_int8_sv_f8_accum_f32_fuse_v_scale_attn_inst_buf(
     throw std::invalid_argument(err_msg.str());  
   }
 
-  torch::Tensor lse = torch::empty({0});
+  torch::Tensor lse;
   if (return_lse)
   {
     lse = torch::empty({batch_size, num_qo_heads, qo_len}, query.options().dtype(torch::kFloat32));
+  }
+  else
+  {
+    lse = torch::empty({0}, query.options().dtype(torch::kFloat32));
   }
 
   const int num_kv_groups = num_qo_heads / num_kv_heads;
